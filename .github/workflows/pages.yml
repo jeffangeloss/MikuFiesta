@@ -1,0 +1,61 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_state:
+        description: Override the deployed state for validation.
+        required: false
+        default: auto
+        type: choice
+        options:
+          - auto
+          - locked
+          - open
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build site artifact
+        env:
+          OPEN_AT_UTC: 2026-04-17T17:00:00Z
+          FORCE_STATE: ${{ github.event_name == 'workflow_dispatch' && inputs.force_state || 'auto' }}
+          SITE_OPEN_HTML_B64: ${{ secrets.SITE_OPEN_HTML_B64 }}
+        run: ./scripts/build-pages.sh
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

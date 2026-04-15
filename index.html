@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso bloqueado hasta el 17 de abril de 2026</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-1: #050816;
+      --bg-2: #101a33;
+      --panel: rgba(10, 15, 31, 0.78);
+      --line: rgba(149, 208, 255, 0.28);
+      --glow: rgba(126, 211, 255, 0.18);
+      --text: #f4f7ff;
+      --muted: rgba(244, 247, 255, 0.72);
+      --accent: #83e7ff;
+      --accent-2: #ffc4ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(131, 231, 255, 0.16), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(255, 196, 239, 0.16), transparent 28%),
+        linear-gradient(160deg, var(--bg-2), var(--bg-1) 62%);
+      overflow: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 30px 30px;
+      mask-image: radial-gradient(circle at center, black 42%, transparent 88%);
+      opacity: 0.32;
+    }
+
+    body::after {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(131, 231, 255, 0.22), transparent 16%),
+        radial-gradient(circle at 80% 30%, rgba(255, 196, 239, 0.18), transparent 18%),
+        radial-gradient(circle at 60% 80%, rgba(131, 231, 255, 0.12), transparent 12%);
+      filter: blur(24px);
+      opacity: 0.9;
+    }
+
+    .shell {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      isolation: isolate;
+    }
+
+    .modal {
+      width: min(100%, 720px);
+      padding: clamp(24px, 4vw, 42px);
+      border-radius: 30px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+        var(--panel);
+      border: 1px solid var(--line);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 0 60px var(--glow);
+      backdrop-filter: blur(18px);
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px rgba(131, 231, 255, 0.7);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 8vw, 4.8rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+    }
+
+    .lead {
+      margin: 18px auto 0;
+      max-width: 38rem;
+      font-size: clamp(1rem, 2.6vw, 1.16rem);
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .launch-time {
+      margin: 28px auto 0;
+      max-width: 28rem;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .countdown-card {
+      padding: 18px 12px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.04)),
+        rgba(6, 11, 24, 0.74);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.24);
+    }
+
+    .countdown-value {
+      display: block;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.06em;
+    }
+
+    .countdown-label {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .note {
+      margin-top: 22px;
+      font-size: 0.95rem;
+      color: rgba(244, 247, 255, 0.64);
+    }
+
+    @media (max-width: 640px) {
+      .countdown {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .modal {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="modal" aria-labelledby="launch-title">
+      <div class="eyebrow">Vista protegida</div>
+      <h1 id="launch-title">Este sitio<br />aun no se abre</h1>
+      <p class="lead">
+        La pagina permanecera bloqueada hasta la fecha de lanzamiento programada.
+        Cuando GitHub Pages publique la version abierta, este bloqueo desaparecera automaticamente.
+      </p>
+
+      <div class="launch-time">
+        Disponible el <strong>17 de abril de 2026</strong><br />
+        a las <strong>12:00 PM</strong> en <strong>America/Lima (UTC-5)</strong>
+      </div>
+
+      <div class="countdown" aria-label="Cuenta regresiva al lanzamiento">
+        <div class="countdown-card">
+          <span class="countdown-value" id="days">--</span>
+          <span class="countdown-label">Dias</span>
+        </div>
+        <div class="countdown-card">
+          <span class="countdown-value" id="hours">--</span>
+          <span class="countdown-label">Horas</span>
+        </div>
+        <div class="countdown-card">
+          <span class="countdown-value" id="minutes">--</span>
+          <span class="countdown-label">Minutos</span>
+        </div>
+        <div class="countdown-card">
+          <span class="countdown-value" id="seconds">--</span>
+          <span class="countdown-label">Segundos</span>
+        </div>
+      </div>
+
+      <p class="note" id="countdown-note">
+        Cuenta regresiva visual basada en tu navegador. La publicacion real se decide desde GitHub Actions.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const targetTime = new Date("2026-04-17T17:00:00Z").getTime();
+    const slots = {
+      days: document.getElementById("days"),
+      hours: document.getElementById("hours"),
+      minutes: document.getElementById("minutes"),
+      seconds: document.getElementById("seconds"),
+    };
+    const note = document.getElementById("countdown-note");
+
+    const pad = (value) => String(value).padStart(2, "0");
+
+    function renderCountdown() {
+      const remaining = Math.max(0, targetTime - Date.now());
+      const totalSeconds = Math.floor(remaining / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      slots.days.textContent = pad(days);
+      slots.hours.textContent = pad(hours);
+      slots.minutes.textContent = pad(minutes);
+      slots.seconds.textContent = pad(seconds);
+
+      if (remaining === 0) {
+        note.textContent = "La fecha objetivo ya se alcanzo. Si aun ves este bloqueo, ejecuta o espera el siguiente despliegue de GitHub Pages.";
+      }
+    }
+
+    renderCountdown();
+    window.setInterval(renderCountdown, 1000);
+  </script>
+</body>
+</html>
