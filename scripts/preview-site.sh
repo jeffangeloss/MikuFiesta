@@ -15,6 +15,12 @@ case "$STATE" in
     ;;
 esac
 
+if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+  echo "Port $PORT is already in use." >&2
+  echo "Try again with a different port, for example: PORT=4181 $0 $STATE" >&2
+  exit 1
+fi
+
 FORCE_STATE="$STATE" "$ROOT_DIR/scripts/build-pages.sh" >/dev/null
 
 echo "Previewing '$STATE' site at http://$HOST:$PORT"

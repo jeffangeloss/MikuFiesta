@@ -5,11 +5,13 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 LOCKED_HTML="$ROOT_DIR/index.html"
 LOCAL_OPEN_HTML="$ROOT_DIR/private/open/index.html"
+LOCAL_ASSETS_DIR="$ROOT_DIR/private/assets"
 OPEN_AT_UTC="${OPEN_AT_UTC:-2026-04-17T17:00:00Z}"
 FORCE_STATE="${FORCE_STATE:-auto}"
 
 mkdir -p "$DIST_DIR"
 rm -f "$DIST_DIR/index.html" "$DIST_DIR/.nojekyll" "$DIST_DIR/build-state.txt"
+rm -rf "$DIST_DIR/assets"
 
 STATE="$(
 python3 - "$OPEN_AT_UTC" "$FORCE_STATE" <<'PY'
@@ -51,6 +53,10 @@ elif [[ -f "$LOCAL_OPEN_HTML" ]]; then
 else
   echo "The open site is missing. Provide SITE_OPEN_HTML_B64 or create private/open/index.html." >&2
   exit 1
+fi
+
+if [[ "$STATE" == "open" && -d "$LOCAL_ASSETS_DIR" ]]; then
+  cp -R "$LOCAL_ASSETS_DIR" "$DIST_DIR/assets"
 fi
 
 touch "$DIST_DIR/.nojekyll"

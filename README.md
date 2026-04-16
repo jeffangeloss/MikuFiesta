@@ -65,3 +65,6 @@ PORT=8080 ./scripts/preview-site.sh open
 ```
 
 The preview server binds to `127.0.0.1`, so it is not exposed as a public internet URL.
+
+If you need local-only media for the unlocked page, keep it in `private/assets/`.
+Those files stay out of git and are copied into `dist/assets/` only when you preview the `open` state locally.
