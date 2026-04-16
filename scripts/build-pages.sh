@@ -6,8 +6,20 @@ DIST_DIR="$ROOT_DIR/dist"
 LOCKED_HTML="$ROOT_DIR/index.html"
 LOCAL_OPEN_HTML="$ROOT_DIR/private/open/index.html"
 LOCAL_ASSETS_DIR="$ROOT_DIR/private/assets"
+SEALED_OPEN_BUNDLE="$ROOT_DIR/secure/open-site.tar.enc"
 OPEN_AT_UTC="${OPEN_AT_UTC:-2026-04-17T17:00:00Z}"
 FORCE_STATE="${FORCE_STATE:-auto}"
+TEMP_DIRS=()
+
+cleanup() {
+  local entry
+
+  for entry in "${TEMP_DIRS[@]:-}"; do
+    [[ -n "$entry" && -e "$entry" ]] && rm -rf "$entry"
+  done
+}
+
+trap cleanup EXIT
 
 mkdir -p "$DIST_DIR"
 rm -f "$DIST_DIR/index.html" "$DIST_DIR/.nojekyll" "$DIST_DIR/build-state.txt"
@@ -36,6 +48,24 @@ PY
 
 if [[ "$STATE" == "locked" ]]; then
   cp "$LOCKED_HTML" "$DIST_DIR/index.html"
+elif [[ -n "${OPEN_SITE_PASSPHRASE:-}" && -f "$SEALED_OPEN_BUNDLE" ]]; then
+  OPEN_TEMP_DIR="$(mktemp -d)"
+  PASSFILE="$(mktemp)"
+  TEMP_DIRS+=("$OPEN_TEMP_DIR" "$PASSFILE")
+
+  printf '%s' "$OPEN_SITE_PASSPHRASE" > "$PASSFILE"
+  openssl enc -d -aes-256-cbc -pbkdf2 -in "$SEALED_OPEN_BUNDLE" -pass "file:$PASSFILE" | tar -xf - -C "$OPEN_TEMP_DIR"
+
+  if [[ ! -f "$OPEN_TEMP_DIR/index.html" ]]; then
+    echo "The sealed open-site bundle does not contain index.html." >&2
+    exit 1
+  fi
+
+  cp "$OPEN_TEMP_DIR/index.html" "$DIST_DIR/index.html"
+
+  if [[ -d "$OPEN_TEMP_DIR/assets" ]]; then
+    cp -R "$OPEN_TEMP_DIR/assets" "$DIST_DIR/assets"
+  fi
 elif [[ -n "${SITE_OPEN_HTML_B64:-}" ]]; then
   python3 - "$DIST_DIR/index.html" <<'PY'
 import base64
@@ -55,7 +85,7 @@ else
   exit 1
 fi
 
-if [[ "$STATE" == "open" && -d "$LOCAL_ASSETS_DIR" ]]; then
+if [[ "$STATE" == "open" && ! -d "$DIST_DIR/assets" && -d "$LOCAL_ASSETS_DIR" ]]; then
   cp -R "$LOCAL_ASSETS_DIR" "$DIST_DIR/assets"
 fi
 

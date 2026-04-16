@@ -43,6 +43,7 @@ jobs:
         env:
           OPEN_AT_UTC: 2026-04-17T17:00:00Z
           FORCE_STATE: ${{ github.event_name == 'workflow_dispatch' && inputs.force_state || 'auto' }}
+          OPEN_SITE_PASSPHRASE: ${{ secrets.OPEN_SITE_PASSPHRASE }}
           SITE_OPEN_HTML_B64: ${{ secrets.SITE_OPEN_HTML_B64 }}
         run: ./scripts/build-pages.sh
 

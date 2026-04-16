@@ -6,24 +6,34 @@ This project publishes a locked landing page to GitHub Pages until `2026-04-17T1
 
 - `index.html` is the public locked page and contains no launch content.
 - `private/open/index.html` is your local source for the unlocked page and is ignored by git.
+- `secure/open-site.tar.enc` is the encrypted launch bundle committed to the public repo.
 - `scripts/build-pages.sh` builds `dist/index.html` in either `locked` or `open` mode.
+- `scripts/seal-open-site.sh` refreshes the encrypted launch bundle from `private/open/` and `private/assets/`.
 - `.github/workflows/pages.yml` deploys the Pages artifact on every push to `main`, on manual dispatch, and every 5 minutes.
 
 ## Required GitHub secret
 
-Create a repository secret named `SITE_OPEN_HTML_B64` with the base64-encoded contents of `private/open/index.html`.
+Create a repository secret named `OPEN_SITE_PASSPHRASE` with the passphrase used to decrypt `secure/open-site.tar.enc`.
 
-Use this command locally to generate it:
+The helper below creates or reuses a local passphrase file at `private/.open-site-passphrase`, then rebuilds the encrypted launch bundle:
 
 ```bash
-base64 < private/open/index.html | tr -d '\n'
+./scripts/seal-open-site.sh
 ```
+
+If you ever need to sync the secret manually, use:
+
+```bash
+gh secret set OPEN_SITE_PASSPHRASE --repo jeffangeloss/MikuFiesta < private/.open-site-passphrase
+```
+
+`SITE_OPEN_HTML_B64` is kept only as a legacy fallback and is no longer the primary release path.
 
 ## GitHub Pages setup
 
 1. Create a new public GitHub repository and push this project to `main`.
 2. In GitHub, go to `Settings` -> `Pages` and set `Source` to `GitHub Actions`.
-3. Add the `SITE_OPEN_HTML_B64` repository secret.
+3. Add the `OPEN_SITE_PASSPHRASE` repository secret and keep `secure/open-site.tar.enc` up to date with `./scripts/seal-open-site.sh`.
 4. Push to `main` to publish the locked page immediately.
 5. Use `Actions` -> `Deploy GitHub Pages` -> `Run workflow` with `force_state=open` or `force_state=locked` to validate both states before launch.
 
