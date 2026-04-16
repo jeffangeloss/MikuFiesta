@@ -14,9 +14,13 @@ TEMP_DIRS=()
 cleanup() {
   local entry
 
-  for entry in "${TEMP_DIRS[@]:-}"; do
-    [[ -n "$entry" && -e "$entry" ]] && rm -rf "$entry"
-  done
+  if ((${#TEMP_DIRS[@]})); then
+    for entry in "${TEMP_DIRS[@]}"; do
+      [[ -n "$entry" && -e "$entry" ]] && rm -rf "$entry"
+    done
+  fi
+
+  return 0
 }
 
 trap cleanup EXIT
