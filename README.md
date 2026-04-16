@@ -42,3 +42,26 @@ To force a state locally:
 FORCE_STATE=locked ./scripts/build-pages.sh
 FORCE_STATE=open ./scripts/build-pages.sh
 ```
+
+## Private local preview
+
+Keep GitHub Pages on the locked countdown while you preview the unlocked site only on your own computer:
+
+```bash
+./scripts/preview-site.sh open
+```
+
+Then open:
+
+```text
+http://127.0.0.1:4173
+```
+
+Useful variations:
+
+```bash
+./scripts/preview-site.sh locked
+PORT=8080 ./scripts/preview-site.sh open
+```
+
+The preview server binds to `127.0.0.1`, so it is not exposed as a public internet URL.
